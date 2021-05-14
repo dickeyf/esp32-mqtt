@@ -1,0 +1,22 @@
+<template>
+  <require from="style.css"></require>
+  <require from="wifi_list"></require>
+  
+  <div class="header">
+    Web Config
+  </div>
+  
+  <h1>${message}</h1>
+  <label>Current SSID:</label>
+  <label>Current mqtt URL:</label>
+  <label>Current mqtt username:</label>
+  <label>current mqtt password:</label>
+  <button type="button" click.delegate="onScan()">Scan Wifi Networks</button>
+  <wifi-list wifilist.bind="wifi_list" selectedssid.two-way="wifi_ssid"></wifi-list>
+  <label>Wifi Password:</label><input type=text value.bind="wifi_password" />
+  <label>mqtt URL:</label><input type=text value.bind="mqtt_url" />
+  <label>mqtt username:</label><input type=text value.bind="mqtt_username" />
+  <label>mqtt password:</label><input type=text value.bind="mqtt_password" />
+  <button type="button" click.delegate="onConnect()">Connect</button>
+  <button type="button" click.delegate="onTest()">Test</button>
+</template>

@@ -1,0 +1,13 @@
+* { margin:0; padding:0; box-sizing:border-box; }
+
+.header {
+  background-color: #9090F1;
+  text-align: center;
+  padding: 20px;
+}
+
+.footer {
+  background-color: #F1F1F1;
+  text-align: center;
+  padding: 10px;
+}
