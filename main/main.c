@@ -20,9 +20,12 @@
 #include "wifi.h"
 #include "web.h"
 #include "temp_sensor.h"
+#include "tilt_sensor.h"
 #include "ntp.h"
 
 static const char *TAG = "main";
+#define ENABLE_TEMPERATURE_SENSOR 0
+#define ENABLE_TILT_SENSOR 1
 
 void app_main(void) {
   ESP_LOGI(TAG, "main function start.");
@@ -38,6 +41,11 @@ void app_main(void) {
 
   ESP_ERROR_CHECK(init_web());
 
-  init_temp_sensor();
+  if (ENABLE_TEMPERATURE_SENSOR) {
+    init_temp_sensor();
+  }
+  if (ENABLE_TILT_SENSOR) {
+    init_tilt_sensor();
+  }
 }
 

@@ -17,8 +17,8 @@ void nvs_init() {
 
 
 void default_settings() {
-  strcpy(settings.ap_password, DEFAULT_AP_WIFI_SSID);
-  strcpy(settings.ap_ssid, DEFAULT_AP_WIFI_PASS);
+  strcpy(settings.ap_password, DEFAULT_AP_WIFI_PASS);
+  strcpy(settings.ap_ssid, DEFAULT_AP_WIFI_SSID);
   strcpy(settings.mqtt_uri, "");
   strcpy(settings.mqtt_username, "");
   strcpy(settings.mqtt_password, "");

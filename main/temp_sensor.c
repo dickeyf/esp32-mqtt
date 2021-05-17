@@ -1,6 +1,6 @@
 #include <time.h>
 
-#include "deps/ds18b20/ds18b20.h" //Include library
+#include "deps/ds18b20/ds18b20.h"
 #include "esp_log.h"
 
 #include "freertos/FreeRTOS.h"
@@ -36,7 +36,7 @@ char* create_temp_sensor_reading_event(float temp, time_t timestamp) {
   return event_out;
 }
 
-void sensor_task(void *pvParameters) {
+static void temp_sensor_task(void *pvParameters) {
   char topic[256];
   ds18b20_init(TEMP_SENSOR_GPIO);
 
@@ -60,5 +60,5 @@ void sensor_task(void *pvParameters) {
 }
 
 void init_temp_sensor() {
-  xTaskCreatePinnedToCore(&sensor_task, "sensor_task", 4096, NULL, 5, NULL, 0);
+  xTaskCreatePinnedToCore(&temp_sensor_task, "temp_sensor_task", 4096, NULL, 5, NULL, 0);
 }
