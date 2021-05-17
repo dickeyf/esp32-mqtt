@@ -37,7 +37,6 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event) {
       snprintf(topic, sizeof(topic), "iot/sensors/%s/events/heartbeat", settings.device_id);
       msg_id = esp_mqtt_client_publish(client, topic,
           data_p, 0, 0, 0);
-      ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
       free(data_p);
       break;
     case MQTT_EVENT_UNSUBSCRIBED:
@@ -82,6 +81,10 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base,
   mqtt_event_handler_cb(event_data);
 }
 
+int mqtt_publish(char* topic, const char* payload) {
+    return esp_mqtt_client_publish(mqtt_client, topic,
+        payload, 0, 0, 0);
+}
 
 void mqtt_start(void) {
   const esp_mqtt_client_config_t mqtt_cfg = { .uri =

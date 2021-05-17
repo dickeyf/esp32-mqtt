@@ -12,8 +12,6 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
-#include "esp_wifi.h"
-#include "esp_wpa2.h"
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_system.h"
@@ -21,6 +19,8 @@
 #include "settings.h"
 #include "wifi.h"
 #include "web.h"
+#include "temp_sensor.h"
+#include "ntp.h"
 
 static const char *TAG = "main";
 
@@ -34,6 +34,10 @@ void app_main(void) {
 
   wifi_init();
 
+  time_init();
+
   ESP_ERROR_CHECK(init_web());
+
+  init_temp_sensor();
 }
 

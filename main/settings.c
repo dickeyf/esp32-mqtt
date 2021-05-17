@@ -5,12 +5,8 @@
 #include "nvs_flash.h"
 #include "cjson.h"
 
-static const char *TAG = "settings";
-
 #define DEFAULT_AP_WIFI_SSID      "pigeon_esp"
 #define DEFAULT_AP_WIFI_PASS      "dovecote"
-static const char *WEB_MOUNT_POINT = "/www";
-
 
 settings_t settings;
 
