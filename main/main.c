@@ -24,8 +24,8 @@
 #include "ntp.h"
 
 static const char *TAG = "main";
-#define ENABLE_TEMPERATURE_SENSOR 0
-#define ENABLE_TILT_SENSOR 1
+#define ENABLE_TEMPERATURE_SENSOR 1
+#define ENABLE_TILT_SENSOR 0
 
 void app_main(void) {
   ESP_LOGI(TAG, "main function start.");

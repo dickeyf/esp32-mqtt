@@ -17,6 +17,7 @@
 
 int DS_GPIO;
 int init=0;
+portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
 /// Sends one bit to bus
 void ds18b20_send(char bit){
@@ -43,28 +44,33 @@ unsigned char ds18b20_read(void){
 void ds18b20_send_byte(char data){
   unsigned char i;
   unsigned char x;
+  portENTER_CRITICAL(&mux);
   for(i=0;i<8;i++){
     x = data>>i;
     x &= 0x01;
     ds18b20_send(x);
   }
   ets_delay_us(100);
+  portEXIT_CRITICAL(&mux);
 }
 // Reads one byte from bus
 unsigned char ds18b20_read_byte(void){
   unsigned char i;
   unsigned char data = 0;
+  portENTER_CRITICAL(&mux);
   for (i=0;i<8;i++)
   {
     if(ds18b20_read()) data|=0x01<<i;
     ets_delay_us(15);
   }
+  portEXIT_CRITICAL(&mux);
   return(data);
 }
 // Sends reset pulse
 unsigned char ds18b20_RST_PULSE(void){
   unsigned char PRESENCE;
   gpio_set_direction(DS_GPIO, GPIO_MODE_OUTPUT);
+  portENTER_CRITICAL(&mux);
   gpio_set_level(DS_GPIO,0);
   ets_delay_us(500);
   gpio_set_level(DS_GPIO,1);
@@ -73,6 +79,7 @@ unsigned char ds18b20_RST_PULSE(void){
   if(gpio_get_level(DS_GPIO)==0) PRESENCE=1; else PRESENCE=0;
   ets_delay_us(470);
   if(gpio_get_level(DS_GPIO)==1) PRESENCE=1; else PRESENCE=0;
+  portEXIT_CRITICAL(&mux);
   return PRESENCE;
 }
 // Returns temperature from sensor
