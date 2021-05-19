@@ -1,0 +1,2 @@
+ds18b20 driver (deps/ds18b20) - https://github.com/feelfreelinux/ds18b20
+TinyGPS++ (deps/tinygps) - https://github.com/mikalhart/TinyGPSPlus

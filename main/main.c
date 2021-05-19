@@ -22,11 +22,15 @@
 #include "temp_sensor.h"
 #include "ntp.h"
 #include "trigger_sensor.h"
+#include "analog_sensor.h"
+#include "gps_module.h"
 
 static const char *TAG = "main";
 #define ENABLE_TEMPERATURE_SENSOR 0
 #define ENABLE_TILT_SENSOR 0
-#define ENABLE_MOTION_SENSOR 1
+#define ENABLE_MOTION_SENSOR 0
+#define ENABLE_NOISE_SENSOR 0
+#define ENABLE_GPS_MODULE 1
 
 void app_main(void) {
   ESP_LOGI(TAG, "main function start.");
@@ -50,6 +54,12 @@ void app_main(void) {
   }
   if (ENABLE_MOTION_SENSOR) {
     init_trigger_sensor("motion");
+  }
+  if (ENABLE_NOISE_SENSOR) {
+    init_analog_sensor("noise");
+  }
+  if (ENABLE_GPS_MODULE) {
+    init_gps_module();
   }
 }
 
