@@ -14,7 +14,7 @@
 
 static const char *TAG = "ADC_SENSOR_TASK";
 
-char* create_trigger_sensor_reading_event(
+char* create_analog_sensor_reading_event(
     int triggered, time_t timestamp, const char* sensor_type) {
   cJSON *sensor_reading_event = cJSON_CreateObject();
 
