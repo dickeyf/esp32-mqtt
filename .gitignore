@@ -5,6 +5,7 @@ sdkconfig
 sdkconfig.old
 webconfig/dist/
 
+components/schemas
 node_modules
 /.idea
 *.iml

@@ -26,7 +26,7 @@
 #include "gps_module.h"
 
 static const char *TAG = "main";
-#define ENABLE_TEMPERATURE_SENSOR 0
+#define ENABLE_TEMPERATURE_SENSOR 1
 #define ENABLE_TILT_SENSOR 0
 #define ENABLE_MOTION_SENSOR 0
 #define ENABLE_NOISE_SENSOR 0
