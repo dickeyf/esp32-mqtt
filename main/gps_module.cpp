@@ -12,7 +12,7 @@
 #include "mqtt.h"
 #include "deps/tinygps/tinygps.h"
 #include "cjson.h"
-#include "events/schemas/SensorReading_0_0_1Schema.h"
+#include "SensorReading_0_0_1Schema.h"
 
 
 #define BUF_SIZE (256)
