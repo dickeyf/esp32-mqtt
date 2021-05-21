@@ -28,7 +28,7 @@
 static const char *TAG = "main";
 #define ENABLE_TEMPERATURE_SENSOR 1
 #define ENABLE_TILT_SENSOR 0
-#define ENABLE_MOTION_SENSOR 0
+#define ENABLE_MOTION_SENSOR 1
 #define ENABLE_NOISE_SENSOR 0
 #define ENABLE_GPS_MODULE 1
 

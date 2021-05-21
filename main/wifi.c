@@ -13,24 +13,20 @@
 #define INIT_AP_MAX_STA_CONN   2
 
 static const char *TAG = "rest_if";
+esp_netif_ip_info_t sta_ip_info;
 
 static const char* get_auth_mode(wifi_auth_mode_t authmode) {
   switch (authmode) {
     case WIFI_AUTH_OPEN:
       return "WIFI_AUTH_OPEN";
-      break;
     case WIFI_AUTH_WEP:
       return "WIFI_AUTH_WEP";
-      break;
     case WIFI_AUTH_WPA_PSK:
       return "WIFI_AUTH_WPA_PSK";
-      break;
     case WIFI_AUTH_WPA2_PSK:
       return "WIFI_AUTH_WPA2_PSK";
-      break;
     case WIFI_AUTH_WPA_WPA2_PSK:
       return "WIFI_AUTH_WPA_WPA2_PSK";
-      break;
     default:
       break;
   }
@@ -229,6 +225,7 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base,
   } else if (event_base == IP_EVENT) {
     if (event_id == IP_EVENT_STA_GOT_IP) {
       ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+      sta_ip_info = event->ip_info;
       ESP_LOGI(TAG, "WIFI Station got IP:" IPSTR, IP2STR(&event->ip_info.ip));
       if (strlen(settings.mqtt_uri)!=0) {
         mqtt_start();

@@ -1,20 +1,40 @@
 components:
   schemas:
-    SensorStatus:
+    SensorSettings:
       type: object
       title: SensorStatus
       properties:
-        wifi_ip:
+        ap_ssid:
           type: string
-        mqtt_connected:
+        wifi_ssid:
+          type: string
+        ap_password:
+          type: string
+        device_id:
+          type: string
+        mqtt_url:
+          type: string
+        wifi_password:
+          type: string
+        mqtt_username:
+          type: string
+        mqtt_password:
+          type: string
+    SensorCommand:
+      type: object
+      title: SensorStatus
+      properties:
+        commandName:
+          type: string
+        commandParam3:
+          type: integer
+        commandParam2:
           type: number
-        wifi_up:
+        commandParam4:
           type: boolean
-        time_synced:
-          type: boolean
-        mqtt_subscribed:
-          type: boolean
-    SensorReading-0.0.1:
+        commandParam1:
+          type: string
+    SensorReading:
       type: object
       title: SensorReading
       properties:
@@ -28,10 +48,36 @@ components:
           type: number
         timestamp:
           type: integer
+    SensorStatus:
+      type: object
+      title: SensorStatus
+      properties:
+        wifi_ip:
+          type: string
+        mqtt_connected:
+          type: boolean
+        device_id:
+          type: string
+        wifi_up:
+          type: boolean
+        time_synced:
+          type: boolean
+        mqtt_subscribed:
+          type: boolean
   messages:
+    SensorSettings:
+      payload:
+        $ref: '#/components/schemas/SensorSettings'
+      schemaFormat: application/vnd.aai.asyncapi+json;version=2.0.0
+      contentType: application/json
+    SensorCommand:
+      payload:
+        $ref: '#/components/schemas/SensorCommand'
+      schemaFormat: application/vnd.aai.asyncapi+json;version=2.0.0
+      contentType: application/json
     SensorReading:
       payload:
-        $ref: '#/components/schemas/SensorReading-0.0.1'
+        $ref: '#/components/schemas/SensorReading'
       schemaFormat: application/vnd.aai.asyncapi+json;version=2.0.0
       contentType: application/json
     SensorStatus:
@@ -40,6 +86,14 @@ components:
       schemaFormat: application/vnd.aai.asyncapi+json;version=2.0.0
       contentType: application/json
 channels:
+  'iot/sensor/{sensorID}/config':
+    subscribe:
+      message:
+        $ref: '#/components/messages/SensorSettings'
+    parameters:
+      sensorID:
+        schema:
+          type: string
   'iot/sensor/{sensorID}/{sensorType}/events/reading':
     subscribe:
       message:
@@ -53,6 +107,17 @@ channels:
             - tilt
             - motion
             - gps
+      sensorID:
+        schema:
+          type: string
+  'iot/sensor/{sensorID}/commands/{commandType}':
+    publish:
+      message:
+        $ref: '#/components/messages/SensorCommand'
+    parameters:
+      commandType:
+        schema:
+          type: string
       sensorID:
         schema:
           type: string

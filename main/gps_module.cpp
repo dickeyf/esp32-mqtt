@@ -12,8 +12,7 @@
 #include "mqtt.h"
 #include "deps/tinygps/tinygps.h"
 #include "cjson.h"
-#include "SensorReading_0_0_1Schema.h"
-
+#include "SensorReadingSchema.h"
 
 #define BUF_SIZE (256)
 #define RD_BUF_SIZE (BUF_SIZE)
@@ -22,14 +21,14 @@ static const char *TAG = "GPS_TASK";
 TinyGPSPlus gps;
 
 char* create_gps_position_event(double lat, double lng, time_t timestamp) {
-    SensorReading_0_0_1 sensorReading = {
+    SensorReading sensorReading = {
             .unit = "lat/long",
             .value2 = lng,
             .sensor_type = "gps",
             .value = lat,
             .timestamp = timestamp
     };
-    cJSON* gps_position_event = create_SensorReading_0_0_1Schema(&sensorReading);
+    cJSON* gps_position_event = create_SensorReadingSchema(&sensorReading);
 
     char* event_out = cJSON_PrintUnformatted(gps_position_event);
     cJSON_Delete(gps_position_event);
