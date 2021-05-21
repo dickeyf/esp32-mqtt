@@ -2,6 +2,7 @@
 #include "esp_log.h"
 #include "settings.h"
 #include "status.h"
+#include "commands.h"
 
 
 static const char *TAG = "MQTT_CLIENT";
@@ -20,7 +21,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event) {
   switch (event->event_id) {
     case MQTT_EVENT_CONNECTED:
       ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
-      snprintf(topic, sizeof(topic), "iot/sensors/%s/#", settings.device_id);
+      snprintf(topic, sizeof(topic), "iot/sensors/%s/commands/#", settings.device_id);
       msg_id = esp_mqtt_client_subscribe(client, topic, 0);
       ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
       mqtt_connected();
@@ -48,8 +49,14 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event) {
       break;
     case MQTT_EVENT_DATA:
       ESP_LOGI(TAG, "MQTT_EVENT_DATA");
-      printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
-      printf("DATA=%.*s\r\n", event->data_len, event->data);
+      snprintf(topic, sizeof(topic), "iot/sensors/%s/commands", settings.device_id);
+      int prefixLen = strlen(topic);
+      if (event->topic_len > prefixLen && memcmp(topic, event->topic, prefixLen) == 0) {
+          handleCommand(event->data);
+      } else {
+          printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
+          printf("DATA=%.*s\r\n", event->data_len, event->data);
+      }
       break;
     case MQTT_EVENT_ERROR:
       ESP_LOGI(TAG, "MQTT_EVENT_ERROR");

@@ -1,4 +1,4 @@
-/* Esptouch example
+/* ESP32 async API code-gen example
 
  This example code is in the Public Domain (or CC0 licensed, at your option.)
 

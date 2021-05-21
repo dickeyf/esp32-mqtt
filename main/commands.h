@@ -1,0 +1,1 @@
+void handleCommand(const char* jsonTextData);
