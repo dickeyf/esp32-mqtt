@@ -15,7 +15,6 @@
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_system.h"
-#include "esp_netif.h"
 #include "settings.h"
 #include "wifi.h"
 #include "web.h"
@@ -37,6 +36,7 @@ void app_main(void) {
 
   ESP_ERROR_CHECK(esp_netif_init());
   ESP_ERROR_CHECK(esp_event_loop_create_default());
+
 
   nvs_init();
 

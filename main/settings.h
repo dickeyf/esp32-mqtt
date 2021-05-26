@@ -10,7 +10,7 @@ typedef struct {
   char mqtt_uri[256];
   char mqtt_username[32];
   char mqtt_password[32];
-  char device_id[16];
+  char device_id[32];
 } settings_t;
 
 extern settings_t settings;
