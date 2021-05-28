@@ -3,12 +3,6 @@
 
 static const char *TAG = "COMMANDS";
 
-const char* commandName;
-int commandParam3;
-double commandParam2;
-bool commandParam4;
-const char* commandParam1;
-
 void handleCommand(const char* jsonTextData) {
     struct SensorCommand* sensorCommand;
     const char* error_msg;
