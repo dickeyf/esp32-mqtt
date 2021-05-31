@@ -23,43 +23,52 @@
 #include "trigger_sensor.h"
 #include "analog_sensor.h"
 #include "gps_module.h"
+#include "distance_sensor.h"
 
 static const char *TAG = "main";
-#define ENABLE_TEMPERATURE_SENSOR 1
+#define ENABLE_TEMPERATURE_SENSOR 0
 #define ENABLE_TILT_SENSOR 0
-#define ENABLE_MOTION_SENSOR 1
+#define ENABLE_MOTION_SENSOR 0
+#define ENABLE_HALL_SENSOR 0
+#define ENABLE_DISTANCE_MODULE 1
 #define ENABLE_NOISE_SENSOR 0
-#define ENABLE_GPS_MODULE 1
+#define ENABLE_GPS_MODULE 0
 
 void app_main(void) {
-  ESP_LOGI(TAG, "main function start.");
+    ESP_LOGI(TAG, "main function start.");
 
-  ESP_ERROR_CHECK(esp_netif_init());
-  ESP_ERROR_CHECK(esp_event_loop_create_default());
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
 
 
-  nvs_init();
+    nvs_init();
 
-  wifi_init();
+    wifi_init();
 
-  time_init();
+    time_init();
 
-  ESP_ERROR_CHECK(init_web());
+    ESP_ERROR_CHECK(init_web());
 
-  if (ENABLE_TEMPERATURE_SENSOR) {
-    init_temp_sensor();
-  }
-  if (ENABLE_TILT_SENSOR) {
-    init_trigger_sensor("tilt");
-  }
-  if (ENABLE_MOTION_SENSOR) {
-    init_trigger_sensor("motion");
-  }
-  if (ENABLE_NOISE_SENSOR) {
-    init_analog_sensor("noise");
-  }
-  if (ENABLE_GPS_MODULE) {
-    init_gps_module();
-  }
+    if (ENABLE_TEMPERATURE_SENSOR) {
+        init_temp_sensor();
+    }
+    if (ENABLE_TILT_SENSOR) {
+        init_trigger_sensor("tilt");
+    }
+    if (ENABLE_HALL_SENSOR) {
+        init_trigger_sensor("hall");
+    }
+    if (ENABLE_MOTION_SENSOR) {
+        init_trigger_sensor("motion");
+    }
+    if (ENABLE_NOISE_SENSOR) {
+        init_analog_sensor("noise");
+    }
+    if (ENABLE_GPS_MODULE) {
+        init_gps_module();
+    }
+    if (ENABLE_DISTANCE_MODULE) {
+        init_distance_sensor();
+    }
 }
 

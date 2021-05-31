@@ -20,6 +20,8 @@ components:
           type: string
         mqtt_password:
           type: string
+        datacenter_id:
+          type: string
     SensorCommand:
       type: object
       title: SensorStatus
@@ -86,15 +88,18 @@ components:
       schemaFormat: application/vnd.aai.asyncapi+json;version=2.0.0
       contentType: application/json
 channels:
-  'iot/sensor/{sensorID}/config':
+  'iot/sensor/{datacenterID}/{sensorID}/status':
     subscribe:
       message:
-        $ref: '#/components/messages/SensorSettings'
+        $ref: '#/components/messages/SensorStatus'
     parameters:
+      datacenterID:
+        schema:
+          type: string
       sensorID:
         schema:
           type: string
-  'iot/sensor/{sensorID}/{sensorType}/events/reading':
+  'iot/sensor/{datacenterID}/{sensorID}/{sensorType}/events/reading':
     subscribe:
       message:
         $ref: '#/components/messages/SensorReading'
@@ -102,15 +107,24 @@ channels:
       sensorType:
         schema:
           type: string
-          enum:
-            - temperature
-            - tilt
-            - motion
-            - gps
+      datacenterID:
+        schema:
+          type: string
       sensorID:
         schema:
           type: string
-  'iot/sensor/{sensorID}/commands/{commandType}':
+  'iot/sensor/{datacenterID}/{sensorID}/config':
+    subscribe:
+      message:
+        $ref: '#/components/messages/SensorSettings'
+    parameters:
+      datacenterID:
+        schema:
+          type: string
+      sensorID:
+        schema:
+          type: string
+  'iot/sensor/{datacenterID}/{sensorID}/commands/{commandType}':
     publish:
       message:
         $ref: '#/components/messages/SensorCommand'
@@ -118,14 +132,9 @@ channels:
       commandType:
         schema:
           type: string
-      sensorID:
+      datacenterID:
         schema:
           type: string
-  'iot/sensor/{sensorID}/status':
-    subscribe:
-      message:
-        $ref: '#/components/messages/SensorStatus'
-    parameters:
       sensorID:
         schema:
           type: string

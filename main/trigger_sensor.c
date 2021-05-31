@@ -9,6 +9,7 @@
 #include "status.h"
 #include "mqtt.h"
 #include "SensorReadingSchema.h"
+#include "topics.h"
 
 #include "cjson.h"
 
@@ -53,8 +54,7 @@ static void tilt_sensor_task(void *pvParameters) {
                 ESP_LOGI(TAG, "[%lu] %s sensor triggered: %s\n", ts, sensor_type, triggered ? "true" : "false");
                 char *temp_evt = create_trigger_sensor_reading_event(
                         triggered, ts, sensor_type);
-                snprintf(topic, sizeof(topic), "iot/sensors/%s/events/%s/reading",
-                         settings.device_id, sensor_type);
+                getSensorReadingTopic(topic, sizeof(topic), sensor_type);
                 mqtt_publish(topic, temp_evt);
                 free(temp_evt);
             }
@@ -63,5 +63,5 @@ static void tilt_sensor_task(void *pvParameters) {
 }
 
 void init_trigger_sensor(const char *sensor_type) {
-    xTaskCreatePinnedToCore(&tilt_sensor_task, "trigger_sensor_task", 4096, sensor_type, 5, NULL, 0);
+    xTaskCreatePinnedToCore(&tilt_sensor_task, "trigger_sensor_task", 4096, (void * const)sensor_type, 5, NULL, 0);
 }

@@ -4,6 +4,7 @@
 #include "status.h"
 #include "commands.h"
 
+#include "topics.h"
 
 static const char *TAG = "MQTT_CLIENT";
 extern const uint8_t mqtt_eclipse_org_pem_start[] asm("_binary_trust_store_cer_start");
@@ -21,7 +22,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event) {
   switch (event->event_id) {
     case MQTT_EVENT_CONNECTED:
       ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
-      snprintf(topic, sizeof(topic), "iot/sensors/%s/commands/#", settings.device_id);
+      snprintf(topic, sizeof(topic), "iot/sensor/%s/%s/commands/#", settings.datacenter_id, settings.device_id);
       msg_id = esp_mqtt_client_subscribe(client, topic, 0);
       ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
       mqtt_connected();
@@ -35,9 +36,8 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event) {
       ESP_LOGI(TAG, "MQTT_EVENT_SUBSCRIBED, msg_id=%d", event->msg_id);
       mqtt_subscribed();
       char* data_p = get_health();
-      snprintf(topic, sizeof(topic), "iot/sensors/%s/events/heartbeat", settings.device_id);
-      msg_id = esp_mqtt_client_publish(client, topic,
-          data_p, 0, 0, 0);
+      getSensorStatusTopic(topic, sizeof(topic), settings.device_id);
+      msg_id = esp_mqtt_client_publish(client, topic, data_p, 0, 0, 0);
       free(data_p);
       break;
     case MQTT_EVENT_UNSUBSCRIBED:
@@ -49,7 +49,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event) {
       break;
     case MQTT_EVENT_DATA:
       ESP_LOGI(TAG, "MQTT_EVENT_DATA");
-      snprintf(topic, sizeof(topic), "iot/sensors/%s/commands", settings.device_id);
+      snprintf(topic, sizeof(topic), "iot/sensor/%s/%s/commands", settings.datacenter_id, settings.device_id);
       int prefixLen = strlen(topic);
       if (event->topic_len > prefixLen && memcmp(topic, event->topic, prefixLen) == 0) {
           handleCommand(event->data);
@@ -95,7 +95,7 @@ int mqtt_publish(char* topic, const char* payload) {
 
 void mqtt_start(void) {
   const esp_mqtt_client_config_t mqtt_cfg = { .uri =
-      settings.mqtt_uri, .username = settings.mqtt_username, .password =
+      settings.mqtt_url, .username = settings.mqtt_username, .password =
       settings.mqtt_password, .cert_pem = (const char*) mqtt_eclipse_org_pem_start, };
 
   ESP_LOGI(TAG, "[APP] Free memory: %d bytes", esp_get_free_heap_size());

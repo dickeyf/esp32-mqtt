@@ -9,6 +9,7 @@
 #include "status.h"
 #include "mqtt.h"
 #include "SensorReadingSchema.h"
+#include "topics.h"
 
 #include "cjson.h"
 
@@ -36,16 +37,16 @@ static void temp_sensor_task(void *pvParameters) {
     ds18b20_init(TEMP_SENSOR_GPIO);
 
     while (1) {
-        time_t ts;
-
-        time(&ts);
-        float temp = ds18b20_get_temp();
-        ESP_LOGI(TAG, "[%lu] Temperature: %0.1f\n", ts, temp);
-
         if (is_mqtt_subscribed() && is_time_synced()) {
+            time_t ts;
+
+            time(&ts);
+            float temp = ds18b20_get_temp();
+            ESP_LOGI(TAG, "[%lu] Temperature: %0.1f\n", ts, temp);
+
             char *temp_evt = create_temp_sensor_reading_event(temp, ts);
-            snprintf(topic, sizeof(topic), "iot/sensors/%s/events/temperature/reading",
-                     settings.device_id);
+
+            getSensorReadingTopic(topic, sizeof(topic), "temperature");
             mqtt_publish(topic, temp_evt);
             free(temp_evt);
         }

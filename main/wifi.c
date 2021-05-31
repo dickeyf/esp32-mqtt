@@ -73,13 +73,13 @@ void initialise_wifi_ap() {
 
   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
   ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
-  if (strlen(settings.ssid) != 0) {
-    strcpy((char*)wifi_config.sta.ssid, settings.ssid);
-    strcpy((char*)wifi_config.sta.password, settings.password);
+  if (strlen(settings.wifi_ssid) != 0) {
+    strcpy((char*)wifi_config.sta.ssid, settings.wifi_ssid);
+    strcpy((char*)wifi_config.sta.password, settings.wifi_password);
     wifi_config.sta.bssid_set = 0;
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     ESP_LOGI(TAG, "wifi station config set.  SSID:%s password:%s",
-        settings.ssid, settings.password);
+        settings.wifi_ssid, settings.wifi_password);
   }
 
   ESP_ERROR_CHECK(esp_wifi_start());
@@ -215,7 +215,7 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base,
     } else if (event_id == WIFI_EVENT_STA_DISCONNECTED) {
       ESP_LOGI(TAG, "WIFI STATION DISCONNECTED");
       station_disconnected();
-      if (strlen(settings.ssid)!=0) {
+      if (strlen(settings.wifi_ssid)!=0) {
         esp_wifi_connect();
       }
     } else if (event_id == WIFI_EVENT_STA_CONNECTED) {
@@ -227,7 +227,7 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base,
       ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
       sta_ip_info = event->ip_info;
       ESP_LOGI(TAG, "WIFI Station got IP:" IPSTR, IP2STR(&event->ip_info.ip));
-      if (strlen(settings.mqtt_uri)!=0) {
+      if (strlen(settings.mqtt_url)!=0) {
         mqtt_start();
       }
       ip_acquired();

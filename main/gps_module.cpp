@@ -13,6 +13,7 @@
 #include "deps/tinygps/tinygps.h"
 #include "cjson.h"
 #include "SensorReadingSchema.h"
+#include "topics.h"
 
 #define BUF_SIZE (256)
 #define RD_BUF_SIZE (BUF_SIZE)
@@ -21,7 +22,8 @@ static const char *TAG = "GPS_TASK";
 TinyGPSPlus gps;
 
 char* create_gps_position_event(double lat, double lng, time_t timestamp) {
-    SensorReading sensorReading = {
+    struct SensorReading sensorReading = {
+            .jsonObj = NULL,
             .unit = "lat/long",
             .value2 = lng,
             .sensor_type = "gps",
@@ -92,6 +94,7 @@ static void gps_task(void *pvParameters) {
             .stop_bits = UART_STOP_BITS_1,
             .flow_ctrl = UART_HW_FLOWCTRL_CTS_RTS,
             .rx_flow_ctrl_thresh = 122,
+            .source_clk = UART_SCLK_REF_TICK
     };
 
     //Install UART driver, and get the queue.
@@ -143,8 +146,7 @@ static void gps_task(void *pvParameters) {
                 ESP_LOGI(TAG, "[%lu] GPS Event: %.6f %.6f\n", ts, lat, lng);
 
                 char* temp_evt = create_gps_position_event(lat, lng, ts);
-                snprintf(topic, sizeof(topic), "iot/sensors/%s/events/gps/position",
-                         settings.device_id);
+                getSensorReadingTopic(topic, sizeof(topic), "gps");
                 mqtt_publish(topic, temp_evt);
                 free(temp_evt);
             }

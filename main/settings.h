@@ -3,14 +3,15 @@
 #define SETTING_NAMESPACE "setting"
 
 typedef struct {
-  char ssid[32];
-  char password[64];
+  char wifi_ssid[32];
+  char wifi_password[64];
   char ap_ssid[32];
   char ap_password[64];
-  char mqtt_uri[256];
+  char mqtt_url[256];
   char mqtt_username[32];
   char mqtt_password[32];
   char device_id[32];
+  char datacenter_id[32];
 } settings_t;
 
 extern settings_t settings;

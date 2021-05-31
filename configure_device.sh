@@ -2,7 +2,7 @@
 
 usage () {
   echo "USAGE:"
-  echo "./configure_device.sh [--dev <DEVICE_HOSTNAME>] --ssid <WIFI SSID> --wifi-pwd <WIFI PASSPHRASE> --mqtt-uri <MQTT URL> --mqtt-user <MQTT USERNAME> --mqtt-pwd <MQTT PASSWORD> "
+  echo "./configure_device.sh [--host <DEVICE_HOSTNAME>] --dc <DATACENTER_ID> --ssid <WIFI SSID> --wifi-pwd <WIFI PASSPHRASE> --mqtt-uri <MQTT URL> --mqtt-user <MQTT USERNAME> --mqtt-pwd <MQTT PASSWORD> "
   echo "DEVICE_HOSTNAME: The hostname/IP Address of the ESP32 device.  By default this is 192.168.4.1 which is the case when you have joined the device's WIFI AP."
   echo "AP SSID: The SSID of the AP this device will listen onto."
   echo "AP PASSPHRASE: The WPA2 wifi passphrase for the AP this device will listen onto."
@@ -11,19 +11,41 @@ usage () {
   echo "MQTT URL: The MQTT URL of the broker this device will be connecting to.  Exemple: wss://mr6ahxyib3jp2.messaging.solace.cloud:8443"
   echo "MQTT USERNAME: The MQTT USERNAME this device uses to authenticate to the broker ."
   echo "MQTT PASSWORD: The MQTT PASSWORD this device uses to authenticate to the broker."
+  echo "DATACENTER_ID: The ID of the datacenter this devices connects to.  Defaults to 'default'."
+  echo "DEVICE_ID: The ID of this devices.  This is by default the MQTT username specified here."
 }
 
 AP_SSID=pigeon_esp
 AP_PWD=dovecote
 
+DEVICE_HOSTNAME=192.168.4.1
+
 while (( "$#" )); do
   case "$1" in
-    --dev)
+    --host)
       if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
         DEVICE_HOSTNAME=$2
         shift 2
       else
         echo "Error: device hostname is missing" >&2
+        exit 1
+      fi
+      ;;
+    --dev)
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        DEVICE_ID=$2
+        shift 2
+      else
+        echo "Error: device ID is missing" >&2
+        exit 1
+      fi
+      ;;
+    --dc)
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        DATACENTER_ID=$2
+        shift 2
+      else
+        echo "Error: DATACENTER_ID is missing" >&2
         exit 1
       fi
       ;;
@@ -90,13 +112,26 @@ then
 fi
 
 
-echo "Configuring ${DEVICE_HOSTNAME} with these parameters"
-echo "WIFI SSID to join: ${WIFI_SSID}"
-echo "Device's AP SSID: ${AP_SSID}"
+if [[ -z ${DEVICE_ID} ]];
+then
+  DEVICE_ID=${MQTT_USER}
+fi
 
-DEVICE_ID=${MQTT_USER}
+if [[ -z ${DATACENTER_ID} ]];
+then
+  DATACENTER_ID=default
+fi
+
 AP_SSID=${MQTT_USER}
 AP_PWD=${MQTT_PWD}
 
-curl --location --request POST "http://${DEVICE_HOSTNAME}/settings" --header 'Content-Type: application/json' --data-raw "{\"wifi_ssid\": \"${WIFI_SSID}\", \"wifi_password\": \"${WIFI_PWD}\",\"ap_ssid\": \"${AP_SSID}\",\"ap_password\": \"${AP_PWD}\",\"mqtt_uri\": \"${MQTT_URI}\",\"mqtt_username\": \"${MQTT_USER}\",\"mqtt_password\": \"${MQTT_PWD}\",\"device_id\": \"${DEVICE_ID}\" }"
+echo "Configuring ${DEVICE_HOSTNAME} with these parameters:"
+echo "Device ID: ${DEVICE_ID}"
+echo "DATACENTER_ID: ${DATACENTER_ID}"
+echo "WIFI SSID to join: ${WIFI_SSID}"
+echo "Device's AP SSID: ${AP_SSID}"
+echo "MQTT Broker's URL: ${MQTT_URI}"
+
+
+curl --location --request POST "http://${DEVICE_HOSTNAME}/settings" --header 'Content-Type: application/json' --data-raw "{\"wifi_ssid\": \"${WIFI_SSID}\", \"wifi_password\": \"${WIFI_PWD}\",\"ap_ssid\": \"${AP_SSID}\",\"ap_password\": \"${AP_PWD}\",\"mqtt_url\": \"${MQTT_URI}\",\"mqtt_username\": \"${MQTT_USER}\",\"mqtt_password\": \"${MQTT_PWD}\",\"device_id\": \"${DEVICE_ID}\",\"datacenter_id\": \"${DATACENTER_ID}\" }"
 
