@@ -24,18 +24,28 @@
 #include "analog_sensor.h"
 #include "gps_module.h"
 #include "distance_sensor.h"
+#include "camera.h"
+#include "motors.h"
 
 static const char *TAG = "main";
 #define ENABLE_TEMPERATURE_SENSOR 0
 #define ENABLE_TILT_SENSOR 0
 #define ENABLE_MOTION_SENSOR 0
 #define ENABLE_HALL_SENSOR 0
-#define ENABLE_DISTANCE_MODULE 1
+#define ENABLE_DISTANCE_MODULE 0
 #define ENABLE_NOISE_SENSOR 0
 #define ENABLE_GPS_MODULE 0
+#define ENABLE_ESP32_CAM 1
+#define ENABLE_MOTORS_DRIVER 1
 
 void app_main(void) {
     ESP_LOGI(TAG, "main function start.");
+
+    //Init motor as soon as possible to avoid wheels spinning at boot time (I wonder if I can flash a config to set the
+    //pin)
+    if (ENABLE_MOTORS_DRIVER) {
+        init_motors();
+    }
 
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
@@ -69,6 +79,9 @@ void app_main(void) {
     }
     if (ENABLE_DISTANCE_MODULE) {
         init_distance_sensor();
+    }
+    if (ENABLE_ESP32_CAM) {
+        init_camera();
     }
 }
 
