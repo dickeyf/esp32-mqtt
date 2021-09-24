@@ -4,7 +4,7 @@
 #include "status.h"
 #include "settings.h"
 #include "wifi.h"
-#include "SensorStatusSchema.h"
+#include "SensorStatusMessage.h"
 
 uint32_t status = 0;
 
@@ -22,9 +22,5 @@ char *get_health() {
         .mqtt_subscribed = is_mqtt_subscribed()
     };
 
-    cJSON *healthResponse = create_SensorStatusSchema(&sensorStatus);
-    char *response = cJSON_PrintUnformatted(healthResponse);
-    cJSON_Delete(healthResponse);
-
-    return response;
+    return create_SensorStatusMessage(&sensorStatus);
 }

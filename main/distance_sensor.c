@@ -10,14 +10,14 @@
 #include "mqtt.h"
 #include "status.h"
 #include "topics.h"
-#include "SensorReadingSchema.h"
+#include "SensorReadingMessage.h"
 
 const int DIST_SENSOR_PING_GPIO = 15; //GPIO where you connected trigger pin
 const int DIST_SENSOR_PONG_GPIO = 36; //GPIO where you connected echo pin
 
 static uint64_t lastRisingEdge = -1;
 static const char *TAG = "DISTANCE_TASK";
-portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
+portMUX_TYPE distance_sensor_mux = portMUX_INITIALIZER_UNLOCKED;
 
 char* create_distance_event(int distanceCM, time_t timestamp) {
     struct SensorReading sensorReading = {
@@ -28,11 +28,7 @@ char* create_distance_event(int distanceCM, time_t timestamp) {
             .value = distanceCM,
             .timestamp = timestamp
     };
-    cJSON* distance_event = create_SensorReadingSchema(&sensorReading);
-
-    char* event_out = cJSON_PrintUnformatted(distance_event);
-    cJSON_Delete(distance_event);
-    return event_out;
+    return create_SensorReadingMessage(&sensorReading);
 }
 
 
@@ -68,11 +64,11 @@ static void distPongIrqCallback( void *arg ) {
 
 
 static void send_ping() {
-    portENTER_CRITICAL(&mux);
+    portENTER_CRITICAL(&distance_sensor_mux);
     gpio_set_level(DIST_SENSOR_PING_GPIO,1);
     ets_delay_us(10);
     gpio_set_level(DIST_SENSOR_PING_GPIO,0);
-    portEXIT_CRITICAL(&mux);
+    portEXIT_CRITICAL(&distance_sensor_mux);
 }
 
 static void distance_sensor_task(void *pvParameters) {

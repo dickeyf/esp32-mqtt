@@ -8,7 +8,7 @@
 #include "settings.h"
 #include "status.h"
 #include "mqtt.h"
-#include "SensorReadingSchema.h"
+#include "SensorReadingMessage.h"
 #include "topics.h"
 
 #include "cjson.h"
@@ -25,11 +25,7 @@ char *create_temp_sensor_reading_event(float temp, time_t timestamp) {
             .value = temp,
             .timestamp = timestamp
     };
-    cJSON *sensor_reading_event = create_SensorReadingSchema(&sensorReading);
-
-    char *event_out = cJSON_PrintUnformatted(sensor_reading_event);
-    cJSON_Delete(sensor_reading_event);
-    return event_out;
+    return create_SensorReadingMessage(&sensorReading);
 }
 
 static void temp_sensor_task(void *pvParameters) {

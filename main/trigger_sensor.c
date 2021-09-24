@@ -8,7 +8,7 @@
 #include "settings.h"
 #include "status.h"
 #include "mqtt.h"
-#include "SensorReadingSchema.h"
+#include "SensorReadingMessage.h"
 #include "topics.h"
 
 #include "cjson.h"
@@ -26,11 +26,8 @@ char *create_trigger_sensor_reading_event(int triggered, time_t timestamp, const
             .value = triggered,
             .timestamp = timestamp
     };
-    cJSON *sensor_reading_event = create_SensorReadingSchema(&sensorReading);
 
-    char *event_out = cJSON_PrintUnformatted(sensor_reading_event);
-    cJSON_Delete(sensor_reading_event);
-    return event_out;
+    return create_SensorReadingMessage(&sensorReading);
 }
 
 static void tilt_sensor_task(void *pvParameters) {

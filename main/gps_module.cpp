@@ -12,7 +12,7 @@
 #include "mqtt.h"
 #include "deps/tinygps/tinygps.h"
 #include "cjson.h"
-#include "SensorReadingSchema.h"
+#include "SensorReadingMessage.h"
 #include "topics.h"
 
 #define BUF_SIZE (256)
@@ -30,11 +30,7 @@ char* create_gps_position_event(double lat, double lng, time_t timestamp) {
             .value = lat,
             .timestamp = timestamp
     };
-    cJSON* gps_position_event = create_SensorReadingSchema(&sensorReading);
-
-    char* event_out = cJSON_PrintUnformatted(gps_position_event);
-    cJSON_Delete(gps_position_event);
-    return event_out;
+    return create_SensorReadingMessage(&sensorReading);
 }
 
 static void service_uart_queue(uart_port_t uart_num, QueueHandle_t uart_queue) {
