@@ -4,6 +4,9 @@
 #include "driver/gpio.h"
 #include "driver/ledc.h"
 #include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
 
 #define PWM_TIMER LEDC_TIMER_1
 
@@ -24,6 +27,8 @@
 #define MOTOR_B_FORWARD 1
 #define MOTOR_C_FORWARD 1
 #define MOTOR_D_FORWARD 0
+
+QueueHandle_t motor_queue;
 
 void set_motor_speed(ledc_channel_t channel, uint32_t duty) {
     ESP_ERROR_CHECK(ledc_set_duty(LEDC_HIGH_SPEED_MODE, channel, duty));
@@ -137,6 +142,61 @@ void motors_right(uint32_t speed) {
     }
 }
 
+struct motor_command {
+    int left_tract_speed;
+    int right_tract_speed;
+};
+
+void motors_update_thrust(int speed, int angle) {
+    struct motor_command motorCommand = {
+            .left_tract_speed = 0,
+            .right_tract_speed = 0
+    };
+    if (angle > -45 && angle < 45) {
+        motorCommand.left_tract_speed = speed;
+        motorCommand.right_tract_speed = speed;
+    } else if (angle <= -45 && angle > -135) {
+        motorCommand.left_tract_speed = -speed;
+        motorCommand.right_tract_speed = speed;
+    } else if (angle < -135 || angle > 135) {
+        motorCommand.left_tract_speed = -speed;
+        motorCommand.right_tract_speed = -speed;
+    } else {
+        motorCommand.left_tract_speed = speed;
+        motorCommand.right_tract_speed = -speed;
+    }
+
+    xQueueSend(motor_queue, (void*)&motorCommand, 10/portTICK_PERIOD_MS);
+}
+
+void service_motor_queue() {
+    struct motor_command motorCommand;
+
+    if (xQueueReceive(motor_queue, (void*)&motorCommand, 1000 / portTICK_PERIOD_MS)) {
+        if (MOTOR_A_DIR_GPIO != -1) {
+            set_motor_speed(MOTOR_A_PWM_CHANNEL, abs(motorCommand.right_tract_speed));
+            gpio_set_level(MOTOR_A_DIR_GPIO, motorCommand.right_tract_speed > 0 ? MOTOR_A_FORWARD:!MOTOR_A_FORWARD);
+        }
+
+        if (MOTOR_B_DIR_GPIO != -1) {
+            set_motor_speed(MOTOR_B_PWM_CHANNEL, abs(motorCommand.left_tract_speed));
+            gpio_set_level(MOTOR_B_DIR_GPIO, motorCommand.left_tract_speed > 0 ? MOTOR_B_FORWARD:!MOTOR_B_FORWARD);
+        }
+    } else {
+        // Stop motors, must have lost signal.
+        motors_forward(0);
+    }
+}
+
+static void motors_task(void *pvParameters) {
+    motor_queue =
+            xQueueCreate( 4, sizeof(struct motor_command) );
+
+    while (1) {
+        service_motor_queue();
+    }
+}
+
 void init_motors() {
     if (MOTOR_A_DIR_GPIO != -1) {
         gpio_pad_select_gpio(MOTOR_A_DIR_GPIO);
@@ -220,4 +280,5 @@ void init_motors() {
         ledc_channel_config(&ledc_config);
     }
 
+    xTaskCreatePinnedToCore(&motors_task, "motors_task", 8192, NULL, 12, NULL, 0);
 }

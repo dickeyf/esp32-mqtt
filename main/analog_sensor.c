@@ -10,13 +10,12 @@
 #include "status.h"
 #include "mqtt.h"
 #include "SensorReadingMessage.h"
-#include "topics.h"
 
 #include "cjson.h"
 
 static const char *TAG = "ADC_SENSOR_TASK";
 
-char *create_analog_sensor_reading_event(
+void send_analog_sensor_reading_event(
         int reading_value, time_t timestamp, const char *sensor_type, const char *unit) {
     struct SensorReading sensorReading = {
             .jsonObj = NULL,
@@ -26,12 +25,13 @@ char *create_analog_sensor_reading_event(
             .value = reading_value,
             .timestamp = timestamp
     };
-    return create_SensorReadingMessage(&sensorReading);
+
+    publish_SensorReadingMessage(
+            get_mqtt_client(), sensor_type, settings.datacenter_id, settings.device_id, &sensorReading);
 }
 
 static void tilt_sensor_task(void *pvParameters) {
     const char *sensor_type = (const char *) pvParameters;
-    char topic[256];
 
     while (1) {
         vTaskDelay(1);
@@ -42,11 +42,8 @@ static void tilt_sensor_task(void *pvParameters) {
             int reading = adc1_get_raw(ADC1_CHANNEL_0);
             ESP_LOGI(TAG, "[%lu] ADC %s: %d / 4096\n", ts, sensor_type, reading);
 
-            char* temp_evt = create_analog_sensor_reading_event(
+            send_analog_sensor_reading_event(
                   reading, ts, sensor_type, "adc-4k-levels");
-            getSensorReadingTopic(topic, sizeof(topic), sensor_type);
-            mqtt_publish(topic, temp_evt);
-            free(temp_evt);
         }
 
         vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -56,5 +53,5 @@ static void tilt_sensor_task(void *pvParameters) {
 void init_analog_sensor(const char *sensor_type) {
     adc1_config_width(ADC_WIDTH_BIT_12);
     adc1_config_channel_atten(ADC1_CHANNEL_0, ADC_ATTEN_DB_11);
-    xTaskCreatePinnedToCore(&tilt_sensor_task, "trigger_sensor_task", 8192, (void *const) sensor_type, 5, NULL, 0);
+    xTaskCreatePinnedToCore(&tilt_sensor_task, "adc_sensor_task", 8192, (void *const) sensor_type, 5, NULL, 0);
 }

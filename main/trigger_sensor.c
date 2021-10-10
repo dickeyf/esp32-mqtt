@@ -9,7 +9,6 @@
 #include "status.h"
 #include "mqtt.h"
 #include "SensorReadingMessage.h"
-#include "topics.h"
 
 #include "cjson.h"
 
@@ -17,8 +16,7 @@ const int TILT_SENSOR_GPIO = 36; //GPIO where you connected tilt_sensor
 
 static const char *TAG = "SENSOR_TASK";
 
-
-char *create_trigger_sensor_reading_event(int triggered, time_t timestamp, const char *sensor_type) {
+void send_trigger_sensor_reading_event(int triggered, time_t timestamp, const char *sensor_type) {
     struct SensorReading sensorReading = {
             .unit = "boolean",
             .value2 = 0,
@@ -27,13 +25,13 @@ char *create_trigger_sensor_reading_event(int triggered, time_t timestamp, const
             .timestamp = timestamp
     };
 
-    return create_SensorReadingMessage(&sensorReading);
+    publish_SensorReadingMessage(
+            get_mqtt_client(), sensor_type, settings.datacenter_id, settings.device_id, &sensorReading);
 }
 
 static void tilt_sensor_task(void *pvParameters) {
     const char *sensor_type = (const char *) pvParameters;
 
-    char topic[256];
     gpio_pad_select_gpio(TILT_SENSOR_GPIO);
     gpio_set_direction(TILT_SENSOR_GPIO, GPIO_MODE_INPUT);
     int triggered = -1;
@@ -49,11 +47,7 @@ static void tilt_sensor_task(void *pvParameters) {
                 time_t ts;
                 time(&ts);
                 ESP_LOGI(TAG, "[%lu] %s sensor triggered: %s\n", ts, sensor_type, triggered ? "true" : "false");
-                char *temp_evt = create_trigger_sensor_reading_event(
-                        triggered, ts, sensor_type);
-                getSensorReadingTopic(topic, sizeof(topic), sensor_type);
-                mqtt_publish(topic, temp_evt);
-                free(temp_evt);
+                send_trigger_sensor_reading_event(triggered, ts, sensor_type);
             }
         }
     }

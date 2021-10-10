@@ -9,27 +9,28 @@
 #include "status.h"
 #include "mqtt.h"
 #include "SensorReadingMessage.h"
-#include "topics.h"
 
 #include "cjson.h"
 
 const int TEMP_SENSOR_GPIO = 15; //GPIO where you connected ds18b20
 
 static const char *TAG = "SENSOR_TASK";
+static const char *THERMOMETER_SENSOR_TYPE = "thermometer";
 
-char *create_temp_sensor_reading_event(float temp, time_t timestamp) {
+void send_temp_sensor_reading_event(float temp, time_t timestamp) {
     struct SensorReading sensorReading = {
             .unit = "Celcius",
             .value2 = 0,
-            .sensor_type = "thermometer",
+            .sensor_type = THERMOMETER_SENSOR_TYPE,
             .value = temp,
             .timestamp = timestamp
     };
-    return create_SensorReadingMessage(&sensorReading);
+
+    publish_SensorReadingMessage(
+            get_mqtt_client(), THERMOMETER_SENSOR_TYPE, settings.datacenter_id, settings.device_id, &sensorReading);
 }
 
 static void temp_sensor_task(void *pvParameters) {
-    char topic[256];
     ds18b20_init(TEMP_SENSOR_GPIO);
 
     while (1) {
@@ -40,11 +41,7 @@ static void temp_sensor_task(void *pvParameters) {
             float temp = ds18b20_get_temp();
             ESP_LOGI(TAG, "[%lu] Temperature: %0.1f\n", ts, temp);
 
-            char *temp_evt = create_temp_sensor_reading_event(temp, ts);
-
-            getSensorReadingTopic(topic, sizeof(topic), "temperature");
-            mqtt_publish(topic, temp_evt);
-            free(temp_evt);
+            send_temp_sensor_reading_event(temp, ts);
         }
 
         vTaskDelay(1000 / portTICK_PERIOD_MS);

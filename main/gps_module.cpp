@@ -13,24 +13,26 @@
 #include "deps/tinygps/tinygps.h"
 #include "cjson.h"
 #include "SensorReadingMessage.h"
-#include "topics.h"
 
 #define BUF_SIZE (256)
 #define RD_BUF_SIZE (BUF_SIZE)
 
 static const char *TAG = "GPS_TASK";
 TinyGPSPlus gps;
+static const char *GPS_SENSOR_TYPE = "gps";
 
-char* create_gps_position_event(double lat, double lng, time_t timestamp) {
+void send_gps_position_event(double lat, double lng, time_t timestamp) {
     struct SensorReading sensorReading = {
             .jsonObj = NULL,
             .unit = "lat/long",
             .value2 = lng,
-            .sensor_type = "gps",
+            .sensor_type = GPS_SENSOR_TYPE,
             .value = lat,
             .timestamp = timestamp
     };
-    return create_SensorReadingMessage(&sensorReading);
+
+    publish_SensorReadingMessage(
+            get_mqtt_client(), GPS_SENSOR_TYPE, settings.datacenter_id, settings.device_id, &sensorReading);
 }
 
 static void service_uart_queue(uart_port_t uart_num, QueueHandle_t uart_queue) {
@@ -79,8 +81,6 @@ static void service_uart_queue(uart_port_t uart_num, QueueHandle_t uart_queue) {
 
 static void gps_task(void *pvParameters) {
     QueueHandle_t uart_queue;
-
-    char topic[256];
 
     const uart_port_t uart_num = UART_NUM_2;
     uart_config_t uart_config = {
@@ -141,10 +141,7 @@ static void gps_task(void *pvParameters) {
                 time(&ts);
                 ESP_LOGI(TAG, "[%lu] GPS Event: %.6f %.6f\n", ts, lat, lng);
 
-                char* temp_evt = create_gps_position_event(lat, lng, ts);
-                getSensorReadingTopic(topic, sizeof(topic), "gps");
-                mqtt_publish(topic, temp_evt);
-                free(temp_evt);
+                send_gps_position_event(lat, lng, ts);
             }
         }
     }

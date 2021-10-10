@@ -1,5 +1,7 @@
 #include "esp_log.h"
 #include "SensorCommandSchema.h"
+#include "motors.h"
+#include <string.h>
 
 static const char *TAG = "COMMANDS";
 
@@ -17,6 +19,12 @@ void handleCommand(const char* jsonTextData) {
              sensorCommand->commandParam2,
              sensorCommand->commandParam3,
              sensorCommand->commandParam4?"true":"false");
+
+    if (strcmp(sensorCommand->commandName, "thrust")==0) {
+        int speed = sensorCommand->commandParam2 * 4000.0;
+        int angle = sensorCommand->commandParam3;
+        motors_update_thrust(speed, angle);
+    }
 
     free_SensorCommandSchema(sensorCommand);
 }

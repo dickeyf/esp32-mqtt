@@ -8,8 +8,8 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "mqtt.h"
+#include "settings.h"
 #include "status.h"
-#include "topics.h"
 #include "SensorReadingMessage.h"
 
 const int DIST_SENSOR_PING_GPIO = 15; //GPIO where you connected trigger pin
@@ -18,17 +18,20 @@ const int DIST_SENSOR_PONG_GPIO = 36; //GPIO where you connected echo pin
 static uint64_t lastRisingEdge = -1;
 static const char *TAG = "DISTANCE_TASK";
 portMUX_TYPE distance_sensor_mux = portMUX_INITIALIZER_UNLOCKED;
+static const char *DISTANCE_SENSOR_TYPE = "distance";
 
-char* create_distance_event(int distanceCM, time_t timestamp) {
+void send_distance_event(int distanceCM, time_t timestamp) {
     struct SensorReading sensorReading = {
             .jsonObj = NULL,
             .unit = "centimeter",
             .value2 = 0,
-            .sensor_type = "distance",
+            .sensor_type = DISTANCE_SENSOR_TYPE,
             .value = distanceCM,
             .timestamp = timestamp
     };
-    return create_SensorReadingMessage(&sensorReading);
+
+    publish_SensorReadingMessage(
+            get_mqtt_client(), DISTANCE_SENSOR_TYPE, settings.datacenter_id, settings.device_id, &sensorReading);
 }
 
 
@@ -72,8 +75,6 @@ static void send_ping() {
 }
 
 static void distance_sensor_task(void *pvParameters) {
-    char topic[256];
-
     QueueHandle_t dist_sensor_queue = xQueueCreate( 10, 4);
     gpio_pad_select_gpio(DIST_SENSOR_PING_GPIO);
     gpio_set_direction(DIST_SENSOR_PING_GPIO, GPIO_MODE_OUTPUT);
@@ -107,10 +108,7 @@ static void distance_sensor_task(void *pvParameters) {
             time_t ts;
             time(&ts);
 
-            char* distance_event = create_distance_event(distanceCM, ts);
-            getSensorReadingTopic(topic, sizeof(topic), "distance");
-            mqtt_publish(topic, distance_event);
-            free(distance_event);
+            send_distance_event(distanceCM, ts);
         }
 
         vTaskDelay(1000 / portTICK_PERIOD_MS);

@@ -23,3 +23,4 @@ extern uint32_t status;
 #define is_time_synced() (status & BIT4)
 
 char* get_health();
+void publish_health();
