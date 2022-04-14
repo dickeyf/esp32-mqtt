@@ -1,8 +1,8 @@
 #include <time.h>
 
 #include "driver/gpio.h"
+#include "soc/gpio_reg.h"
 #include "esp_timer.h"
-#include "esp_system.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -11,6 +11,7 @@
 #include "settings.h"
 #include "status.h"
 #include "SensorReadingMessage.h"
+#include "rom/ets_sys.h"
 
 const int DIST_SENSOR_PING_GPIO = 15; //GPIO where you connected trigger pin
 const int DIST_SENSOR_PONG_GPIO = 36; //GPIO where you connected echo pin
@@ -69,14 +70,14 @@ static void distPongIrqCallback( void *arg ) {
 static void send_ping() {
     portENTER_CRITICAL(&distance_sensor_mux);
     gpio_set_level(DIST_SENSOR_PING_GPIO,1);
-    ets_delay_us(10);
+    esp_rom_delay_us(10);
     gpio_set_level(DIST_SENSOR_PING_GPIO,0);
     portEXIT_CRITICAL(&distance_sensor_mux);
 }
 
 static void distance_sensor_task(void *pvParameters) {
     QueueHandle_t dist_sensor_queue = xQueueCreate( 10, 4);
-    gpio_pad_select_gpio(DIST_SENSOR_PING_GPIO);
+    gpio_reset_pin(DIST_SENSOR_PING_GPIO);
     gpio_set_direction(DIST_SENSOR_PING_GPIO, GPIO_MODE_OUTPUT);
     gpio_set_direction(DIST_SENSOR_PONG_GPIO, GPIO_MODE_INPUT);
     gpio_set_pull_mode(DIST_SENSOR_PONG_GPIO, GPIO_PULLDOWN_ONLY);
@@ -96,7 +97,7 @@ static void distance_sensor_task(void *pvParameters) {
         send_ping();
         int echoDuration;
         int distanceCM = -1;
-        if(xQueueReceive(dist_sensor_queue, (void * )&echoDuration, (portTickType)(1000 / portTICK_PERIOD_MS))) {
+        if(xQueueReceive(dist_sensor_queue, (void * )&echoDuration, (TickType_t)(1000 / portTICK_PERIOD_MS))) {
             distanceCM = echoDuration/58;
 
             ESP_LOGI(TAG, "Measured a distance of %d centimeters.", distanceCM);

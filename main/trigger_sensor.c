@@ -32,12 +32,12 @@ void send_trigger_sensor_reading_event(int triggered, time_t timestamp, const ch
 static void tilt_sensor_task(void *pvParameters) {
     const char *sensor_type = (const char *) pvParameters;
 
-    gpio_pad_select_gpio(TILT_SENSOR_GPIO);
+    gpio_reset_pin(TILT_SENSOR_GPIO);
     gpio_set_direction(TILT_SENSOR_GPIO, GPIO_MODE_INPUT);
     int triggered = -1;
 
     while (1) {
-        vTaskDelay(250 / portTICK_RATE_MS);
+        vTaskDelay(250 / portTICK_PERIOD_MS);
 
         if (is_mqtt_subscribed() && is_time_synced()) {
             int curLevel = gpio_get_level(TILT_SENSOR_GPIO);

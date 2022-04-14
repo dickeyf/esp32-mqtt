@@ -6,8 +6,9 @@
 #include "settings.h"
 #include "esp_log.h"
 #include "esp_wifi.h"
+#include "esp_mac.h"
 #include "mqtt.h"
-
+#include "esp_netif.h"
 
 #define INIT_AP_WIFI_CHANNEL   4
 #define INIT_AP_MAX_STA_CONN   2
@@ -78,6 +79,7 @@ void initialise_wifi_ap() {
     strcpy((char*)wifi_config.sta.password, settings.wifi_password);
     wifi_config.sta.bssid_set = 0;
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+
     ESP_LOGI(TAG, "wifi station config set.  SSID:%s password:%s",
         settings.wifi_ssid, settings.wifi_password);
   }
@@ -238,8 +240,38 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base,
   }
 }
 
+void wifi_create_ap() {
+  esp_netif_init();
+  esp_netif_t* wifi_ap_netif = esp_netif_create_default_wifi_ap();
+  ESP_ERROR_CHECK(esp_netif_dhcps_stop(wifi_ap_netif));
+
+  //Configure the AP's netif to default IP.  But most importantly disable the router solicitation address to stop
+  //from making the ESP's a default gateway for clients that joins.  Also disable DNS advertisement.
+  esp_netif_ip_info_t info;
+  memset(&info, 0, sizeof(info));
+  esp_netif_set_ip4_addr(&info.ip, 192, 168, 4, 1);
+  esp_netif_set_ip4_addr(&info.netmask, 255, 255, 255, 0);
+  esp_netif_set_ip4_addr(&info.gw, 192, 168, 4, 1);
+  uint8_t disable_val = 0;
+  esp_netif_dhcps_option(
+          wifi_ap_netif,
+          ESP_NETIF_OP_SET,
+          ESP_NETIF_ROUTER_SOLICITATION_ADDRESS,
+          &disable_val,
+          sizeof(disable_val));
+  esp_netif_dhcps_option(
+          wifi_ap_netif,
+          ESP_NETIF_OP_SET,
+          ESP_NETIF_DOMAIN_NAME_SERVER,
+          &disable_val,
+          sizeof(disable_val));
+  ESP_ERROR_CHECK(esp_netif_set_ip_info(wifi_ap_netif, &info));
+  ESP_ERROR_CHECK(esp_netif_dhcps_start(wifi_ap_netif));
+  esp_wifi_set_default_wifi_ap_handlers();
+}
+
 void wifi_init() {
-  esp_netif_create_default_wifi_ap();
+  wifi_create_ap();
   esp_netif_create_default_wifi_sta();
   wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   ESP_ERROR_CHECK(esp_wifi_init(&cfg));

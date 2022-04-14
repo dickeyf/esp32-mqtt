@@ -54,7 +54,12 @@
 #if CONFIG_GC0308_SUPPORT
 #include "gc0308.h"
 #endif
-
+#if CONFIG_BF3005_SUPPORT
+#include "bf3005.h"
+#endif
+#if CONFIG_BF20A6_SUPPORT
+#include "bf20a6.h"
+#endif
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_ARDUHAL_ESP_LOG)
 #include "esp32-hal-log.h"
@@ -113,6 +118,12 @@ static const sensor_func_t g_sensors[] = {
 #endif
 #if CONFIG_GC0308_SUPPORT
     {gc0308_detect, gc0308_init},
+#endif
+#if CONFIG_BF3005_SUPPORT
+    {bf3005_detect, bf3005_init},
+#endif
+#if CONFIG_BF20A6_SUPPORT
+    {bf20a6_detect, bf20a6_init},
 #endif
 };
 

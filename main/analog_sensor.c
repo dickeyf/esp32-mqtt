@@ -1,5 +1,4 @@
 #include <time.h>
-#include <math.h>
 #include <driver/adc.h>
 
 #include "esp_log.h"

@@ -199,25 +199,25 @@ static void motors_task(void *pvParameters) {
 
 void init_motors() {
     if (MOTOR_A_DIR_GPIO != -1) {
-        gpio_pad_select_gpio(MOTOR_A_DIR_GPIO);
+        gpio_reset_pin(MOTOR_A_DIR_GPIO);
         gpio_set_direction(MOTOR_A_DIR_GPIO, GPIO_MODE_OUTPUT);
         gpio_set_level(MOTOR_A_DIR_GPIO, 1);
     }
 
     if (MOTOR_B_DIR_GPIO != -1) {
-        gpio_pad_select_gpio(MOTOR_B_DIR_GPIO);
+        gpio_reset_pin(MOTOR_B_DIR_GPIO);
         gpio_set_direction(MOTOR_B_DIR_GPIO, GPIO_MODE_OUTPUT);
         gpio_set_level(MOTOR_B_DIR_GPIO, 1);
     }
 
     if (MOTOR_C_DIR_GPIO != -1) {
-        gpio_pad_select_gpio(MOTOR_C_DIR_GPIO);
+        gpio_reset_pin(MOTOR_C_DIR_GPIO);
         gpio_set_direction(MOTOR_C_DIR_GPIO, GPIO_MODE_OUTPUT);
         gpio_set_level(MOTOR_C_DIR_GPIO, 1);
     }
 
     if (MOTOR_D_DIR_GPIO != -1) {
-        gpio_pad_select_gpio(MOTOR_D_DIR_GPIO);
+        gpio_reset_pin(MOTOR_D_DIR_GPIO);
         gpio_set_direction(MOTOR_D_DIR_GPIO, GPIO_MODE_OUTPUT);
         gpio_set_level(MOTOR_D_DIR_GPIO, 1);
     }

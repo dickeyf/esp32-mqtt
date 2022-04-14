@@ -14,6 +14,7 @@
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "driver/gpio.h"
+#include "rom/ets_sys.h"
 
 int DS_GPIO;
 int init=0;
@@ -92,7 +93,7 @@ float ds18b20_get_temp(void) {
       {
         ds18b20_send_byte(0xCC);
         ds18b20_send_byte(0x44);
-        vTaskDelay(750 / portTICK_RATE_MS);
+        vTaskDelay(750 / portTICK_PERIOD_MS);
         check=ds18b20_RST_PULSE();
         ds18b20_send_byte(0xCC);
         ds18b20_send_byte(0xBE);
@@ -110,6 +111,6 @@ float ds18b20_get_temp(void) {
 }
 void ds18b20_init(int GPIO){
   DS_GPIO = GPIO;
-  gpio_pad_select_gpio(DS_GPIO);
+  gpio_reset_pin(DS_GPIO);
   init=1;
 }

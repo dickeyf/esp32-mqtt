@@ -23,6 +23,11 @@
 #include "ll_cam.h"
 #include "cam_hal.h"
 
+#if (ESP_IDF_VERSION_MAJOR >= 5)
+#define gpio_matrix_in(a,b,c) gpio_iomux_in(a,b)
+#define gpio_matrix_out(a,b,c,d) gpio_iomux_out(a,b,c)
+#endif
+
 static const char *TAG = "s3 ll_cam";
 
 static void IRAM_ATTR ll_cam_vsync_isr(void *arg)
@@ -69,7 +74,7 @@ static void IRAM_ATTR ll_cam_dma_isr(void *arg)
     }
 }
 
-bool ll_cam_stop(cam_obj_t *cam)
+bool IRAM_ATTR ll_cam_stop(cam_obj_t *cam)
 {
     if (cam->jpeg_mode || !cam->psram_mode) {
         GDMA.channel[cam->dma_num].in.int_ena.in_suc_eof = 0;

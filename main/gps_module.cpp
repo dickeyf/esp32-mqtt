@@ -40,7 +40,7 @@ static void service_uart_queue(uart_port_t uart_num, QueueHandle_t uart_queue) {
     uart_event_t event;
 
     //Waiting for UART event.
-    if(xQueueReceive(uart_queue, (void * )&event, (portTickType)portMAX_DELAY)) {
+    if(xQueueReceive(uart_queue, (void * )&event, (TickType_t)portMAX_DELAY)) {
         bzero(dtmp, RD_BUF_SIZE);
         switch(event.type) {
             case UART_DATA:

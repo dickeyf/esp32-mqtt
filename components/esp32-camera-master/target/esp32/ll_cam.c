@@ -34,6 +34,12 @@ static inline int gpio_ll_get_level(gpio_dev_t *hw, int gpio_num)
 #include "xclk.h"
 #include "cam_hal.h"
 
+#if (ESP_IDF_VERSION_MAJOR >= 5)
+#include "rom/gpio.h"
+#define GPIO_PIN_INTR_POSEDGE GPIO_INTR_POSEDGE
+#define GPIO_PIN_INTR_NEGEDGE GPIO_INTR_NEGEDGE
+#endif
+
 static const char *TAG = "esp32 ll_cam";
 
 #define I2S_ISR_ENABLE(i) {I2S0.int_clr.i = 1;I2S0.int_ena.i = 1;}
@@ -227,7 +233,7 @@ static void IRAM_ATTR ll_cam_dma_isr(void *arg)
     //DBG_PIN_SET(0);
 }
 
-bool ll_cam_stop(cam_obj_t *cam)
+bool IRAM_ATTR ll_cam_stop(cam_obj_t *cam)
 {
     I2S0.conf.rx_start = 0;
     I2S_ISR_DISABLE(in_suc_eof);

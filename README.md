@@ -11,6 +11,21 @@ After you connect to the `pigeon_esp` WIFI AP, the REST interface will be availa
 
 Via this endpoint you will be able to configure the device (See the "Configuring a newly flashed device" section below)
 
+### Prerequisites
+
+1. You need espressif IDF installed and loaded in your environment.
+2. You need AsyncAPI code generator installed.
+
+To install IDF:
+MacOS or Linux: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/linux-macos-setup.html
+Windows: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/windows-setup.html
+
+To install AsyncAPI code generator:
+
+```
+npm install -g @asyncapi/generator
+```
+
 ### Configure the project
 
 ```
@@ -21,7 +36,7 @@ idf.py menuconfig
 
 Build the project:
 ```
-idf.py build
+./build.sh
 ```
  
 And then flash it to the board, 

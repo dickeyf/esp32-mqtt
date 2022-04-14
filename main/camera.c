@@ -66,11 +66,11 @@ void camera_flash(uint32_t turnOn) {
 void init_camera() {
     //power up the camera if PWDN pin is defined
     if(CAM_PIN_PWDN != -1){
-        gpio_pad_select_gpio(CAM_FLASH_PIN);
+        gpio_reset_pin(CAM_FLASH_PIN);
         gpio_set_direction(CAM_FLASH_PIN, GPIO_MODE_OUTPUT);
         gpio_set_level(CAM_FLASH_PIN, 0);
 
-        gpio_pad_select_gpio(CAM_PIN_PWDN);
+        gpio_reset_pin(CAM_PIN_PWDN);
         gpio_set_direction(CAM_PIN_PWDN, GPIO_MODE_OUTPUT);
         gpio_set_level(CAM_PIN_PWDN, 0);
     }
