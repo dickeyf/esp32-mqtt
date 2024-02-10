@@ -93,9 +93,11 @@ int mqtt_publish(char* topic, const char* payload) {
 }
 
 void mqtt_start(void) {
+  bool isSSL = (memcmp(settings.mqtt_url, "mqtts", 5)==0) || (memcmp(settings.mqtt_url, "wss", 3)==0);
+
   const esp_mqtt_client_config_t mqtt_cfg = { .uri =
       settings.mqtt_url, .username = settings.mqtt_username, .password =
-      settings.mqtt_password, .cert_pem = (const char*) mqtt_eclipse_org_pem_start, };
+      settings.mqtt_password, .cert_pem = isSSL?(const char*) mqtt_eclipse_org_pem_start:NULL, };
 
   ESP_LOGI(TAG, "[APP] Free memory: %d bytes", esp_get_free_heap_size());
   if (mqtt_client!=NULL) {

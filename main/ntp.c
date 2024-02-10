@@ -8,7 +8,7 @@ static const char *TAG = "TIME";
 void time_sync_notification_cb(struct timeval *tv)
 {
   if (!is_time_synced()) {
-    ESP_LOGI(TAG, "Time synchrronized");
+    ESP_LOGI(TAG, "Time synchronized");
     time_synced();
   }
 }

@@ -5,6 +5,14 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+#include "settings.h"
+#include "status.h"
+#include "mqtt.h"
+
+
 static const char *TAG = "CAMERA_MODULE";
 
 //WROVER-KIT PIN Map
@@ -63,6 +71,53 @@ void camera_flash(uint32_t turnOn) {
     gpio_set_level(CAM_FLASH_PIN, turnOn);
 }
 
+static void camera_stream_task(void *pvParameters) {
+  char topic[256];
+  camera_fb_t * fb = NULL;
+  uint8_t * _jpg_buf;
+  size_t _jpg_buf_len;
+  snprintf(topic, sizeof(topic), "iot/sensor/%s/%s/camera/frames",
+           settings.datacenter_id, settings.device_id);
+
+  char* payload_buf = malloc(1024*100);
+  time_t* ts = (time_t*)payload_buf;
+
+  while (1) {
+    if (is_mqtt_subscribed() && is_time_synced()) {
+      fb = esp_camera_fb_get();
+      time(ts);
+      if (!fb) {
+        ESP_LOGE(TAG, "Camera capture failed");
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        continue;
+      }
+      if(fb->format != PIXFORMAT_JPEG){
+        bool jpeg_converted = frame2jpg(fb, 80, &_jpg_buf, &_jpg_buf_len);
+        if(!jpeg_converted){
+          ESP_LOGE(TAG, "JPEG compression failed");
+          esp_camera_fb_return(fb);
+          vTaskDelay(1000 / portTICK_PERIOD_MS);
+          continue;
+        }
+        ESP_LOGI(TAG, "MJPG: jpeg_converted");
+      } else {
+        _jpg_buf_len = fb->len;
+        _jpg_buf = fb->buf;
+      }
+      memcpy(payload_buf+sizeof(time_t), _jpg_buf, fb->len);
+
+      esp_mqtt_client_publish(get_mqtt_client(), topic, payload_buf, _jpg_buf_len+sizeof(time_t), 0, 0);
+
+      if(fb->format != PIXFORMAT_JPEG){
+        free(_jpg_buf);
+      }
+      esp_camera_fb_return(fb);
+    } else {
+      vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+  }
+}
+
 void init_camera() {
     //power up the camera if PWDN pin is defined
     if(CAM_PIN_PWDN != -1){
@@ -80,4 +135,7 @@ void init_camera() {
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Camera Init Failed");
     }
+
+  xTaskCreatePinnedToCore(&camera_stream_task, "camera_stream_task", 4096, NULL, 5, NULL, 1);
 }
+

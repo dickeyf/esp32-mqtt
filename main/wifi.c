@@ -9,6 +9,7 @@
 #include "esp_mac.h"
 #include "mqtt.h"
 #include "esp_netif.h"
+#include "ntp.h"
 
 #define INIT_AP_WIFI_CHANNEL   4
 #define INIT_AP_MAX_STA_CONN   2
@@ -233,6 +234,7 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base,
         mqtt_start();
       }
       ip_acquired();
+      time_init();
     } else if (event_id == IP_EVENT_STA_LOST_IP) {
       ESP_LOGI(TAG, "WIFI Station lost IP.");
       ip_lost();

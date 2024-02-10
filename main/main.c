@@ -14,7 +14,6 @@
 #include "wifi.h"
 #include "web.h"
 #include "temp_sensor.h"
-#include "ntp.h"
 #include "trigger_sensor.h"
 #include "analog_sensor.h"
 #include "gps_module.h"
@@ -33,7 +32,7 @@ static const char *TAG = "main";
 #define ENABLE_GPS_MODULE 0
 #define ENABLE_ESP32_CAM 1
 #define ENABLE_MOTORS_DRIVER 0
-#define ENABLE_SERVOS_DRIVER 1
+#define ENABLE_SERVOS_DRIVER 0
 
 void app_main(void) {
     ESP_LOGI(TAG, "main function start.");
@@ -54,8 +53,6 @@ void app_main(void) {
     nvs_init();
 
     wifi_init();
-
-    time_init();
 
     ESP_ERROR_CHECK(init_web());
 
