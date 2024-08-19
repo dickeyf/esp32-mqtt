@@ -28,7 +28,7 @@ void send_gps_position_event(double lat, double lng, time_t timestamp) {
             .value2 = lng,
             .sensor_type = GPS_SENSOR_TYPE,
             .value = lat,
-            .timestamp = timestamp
+            .timestamp = static_cast<int>(timestamp)
     };
 
     publish_SensorReadingMessage(
@@ -116,10 +116,10 @@ static void gps_task(void *pvParameters) {
             satelites_valid = gps.satellites.isValid();
 
             if (satelites_valid) {
-                ESP_LOGI(TAG, "Satellite tracking acquired - # tracked: %d",
+                ESP_LOGI(TAG, "Satellite tracking acquired - # tracked: %lu",
                          gps.satellites.value());
             } else {
-                ESP_LOGI(TAG, "Satellite tracking lost - # tracked: %d",
+                ESP_LOGI(TAG, "Satellite tracking lost - # tracked: %lu",
                          gps.satellites.value());
             }
         }
@@ -127,7 +127,7 @@ static void gps_task(void *pvParameters) {
         if (gps.location.isValid() && gps.location.isUpdated()) {
             double lat = gps.location.lat();
             double lng = gps.location.lng();
-            ESP_LOGI(TAG, "Valid position: %.6f %.6f - Satellites: %d",
+            ESP_LOGI(TAG, "Valid position: %.6f %.6f - Satellites: %lu",
                      lat, lng, gps.satellites.value());
 
             double dist_meters = TinyGPSPlus::distanceBetween(
@@ -139,7 +139,7 @@ static void gps_task(void *pvParameters) {
                 time_t ts;
 
                 time(&ts);
-                ESP_LOGI(TAG, "[%lu] GPS Event: %.6f %.6f\n", ts, lat, lng);
+                ESP_LOGI(TAG, "[%llu] GPS Event: %.6f %.6f\n", ts, lat, lng);
 
                 send_gps_position_event(lat, lng, ts);
             }

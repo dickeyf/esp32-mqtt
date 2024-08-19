@@ -50,6 +50,7 @@ components:
           type: number
         timestamp:
           type: integer
+          format: int64
     SensorStatus:
       type: object
       title: SensorStatus
@@ -88,7 +89,7 @@ components:
       schemaFormat: application/vnd.aai.asyncapi+json;version=2.0.0
       contentType: application/json
 channels:
-  'iot/sensor/{datacenterID}/{sensorID}/status':
+  'iot/{datacenterID}/{sensorID}/status':
     subscribe:
       message:
         $ref: '#/components/messages/SensorStatus'
@@ -99,7 +100,7 @@ channels:
       sensorID:
         schema:
           type: string
-  'iot/sensor/{datacenterID}/{sensorID}/{sensorType}/events/reading':
+  'iot/{datacenterID}/{sensorID}/{sensorType}/events/reading':
     subscribe:
       message:
         $ref: '#/components/messages/SensorReading'
@@ -113,7 +114,7 @@ channels:
       sensorID:
         schema:
           type: string
-  'iot/sensor/{datacenterID}/{sensorID}/config':
+  'iot/{datacenterID}/{sensorID}/config':
     subscribe:
       message:
         $ref: '#/components/messages/SensorSettings'
@@ -124,7 +125,7 @@ channels:
       sensorID:
         schema:
           type: string
-  'iot/sensor/{datacenterID}/{sensorID}/commands/{commandType}':
+  'iot/{datacenterID}/{sensorID}/commands/{commandType}':
     publish:
       message:
         $ref: '#/components/messages/SensorCommand'

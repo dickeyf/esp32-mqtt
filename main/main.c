@@ -31,7 +31,8 @@ static const char *TAG = "main";
 #define ENABLE_NOISE_SENSOR 0
 #define ENABLE_GPS_MODULE 0
 #define ENABLE_ESP32_CAM 1
-#define ENABLE_MOTORS_DRIVER 0
+#define ENABLE_ESP32_CAM_MQTT_STREAMING 0
+#define ENABLE_MOTORS_DRIVER 1
 #define ENABLE_SERVOS_DRIVER 0
 
 void app_main(void) {
@@ -78,7 +79,7 @@ void app_main(void) {
         init_distance_sensor();
     }
     if (ENABLE_ESP32_CAM) {
-        init_camera();
+        init_camera(ENABLE_ESP32_CAM_MQTT_STREAMING);
     }
 }
 

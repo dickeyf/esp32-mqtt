@@ -23,7 +23,7 @@ Windows: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started
 To install AsyncAPI code generator:
 
 ```
-npm install -g @asyncapi/generator
+npm install -g @asyncapi/generator@1.17.25
 ```
 
 ### Configure the project

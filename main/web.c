@@ -11,6 +11,7 @@
 #include "esp_spiffs.h"
 #include "esp_log.h"
 #include "esp_camera.h"
+#include "esp_timer.h"
 #include "motors.h"
 
 static const char *TAG = "WEB_SERVER";
@@ -62,7 +63,7 @@ static esp_err_t motors_handler(httpd_req_t *req) {
 
         if (memcmp(scratch, "forward ", 8)==0) {
             int32_t speed = atoi(&scratch[8]);
-            ESP_LOGI(TAG, "Got forward command, speed = %d", speed);
+            ESP_LOGI(TAG, "Got forward command, speed = %ld", speed);
             if (speed >= 0) {
                 motors_forward(speed);
             } else {
@@ -70,7 +71,7 @@ static esp_err_t motors_handler(httpd_req_t *req) {
             }
         } else if (memcmp(scratch, "backward ", 9)==0) {
             int32_t speed = atoi(&scratch[9]);
-            ESP_LOGI(TAG, "Got backward command, speed = %d", speed);
+            ESP_LOGI(TAG, "Got backward command, speed = %ld", speed);
             if (speed >= 0) {
                 motors_backward(speed);
             } else {
@@ -78,7 +79,7 @@ static esp_err_t motors_handler(httpd_req_t *req) {
             }
         } else if (memcmp(scratch, "left ", 5)==0) {
             int32_t speed = atoi(&scratch[5]);
-            ESP_LOGI(TAG, "Got left command, speed = %d", speed);
+            ESP_LOGI(TAG, "Got left command, speed = %ld", speed);
             if (speed >= 0) {
                 motors_left(speed);
             } else {
@@ -86,7 +87,7 @@ static esp_err_t motors_handler(httpd_req_t *req) {
             }
         } else if (memcmp(scratch, "right ", 6)==0) {
             int32_t speed = atoi(&scratch[6]);
-            ESP_LOGI(TAG, "Got right command, speed = %d", speed);
+            ESP_LOGI(TAG, "Got right command, speed = %ld", speed);
             if (speed >= 0) {
                 motors_right(speed);
             } else {
@@ -307,7 +308,7 @@ esp_err_t streaming_camera_handler(httpd_req_t *req){
         int64_t frame_time = fr_end - last_frame;
         last_frame = fr_end;
         frame_time /= 1000;
-        ESP_LOGI(TAG, "MJPG: %uKB %ums (%.1ffps)",
+        ESP_LOGI(TAG, "MJPG: %luKB %lums (%.1ffps)",
                  (uint32_t)(_jpg_buf_len/1024),
                  (uint32_t)frame_time, 1000.0 / (uint32_t)frame_time);
     }

@@ -8,6 +8,8 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 
+static const char *TAG = "MOTORS_MODULE";
+
 #define PWM_TIMER LEDC_TIMER_1
 
 #define MOTOR_A_DIR_GPIO 12
@@ -192,6 +194,7 @@ static void motors_task(void *pvParameters) {
     motor_queue =
             xQueueCreate( 4, sizeof(struct motor_command) );
 
+    ESP_LOGI(TAG, "Motors task initialized.");
     while (1) {
         service_motor_queue();
     }

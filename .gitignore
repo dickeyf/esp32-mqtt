@@ -18,3 +18,7 @@ node_modules
 .DS_Store
 Thumbs.db
 dist/*.map
+
+# Used for Intellij's CLion in Windows (https://www.jetbrains.com/help/clion/esp-idf.html#build)
+# This would be specific to your environment and IDF version.
+espidf_source.bat

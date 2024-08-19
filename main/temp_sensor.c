@@ -39,7 +39,7 @@ static void temp_sensor_task(void *pvParameters) {
 
             time(&ts);
             float temp = ds18b20_get_temp();
-            ESP_LOGI(TAG, "[%lu] Temperature: %0.1f\n", ts, temp);
+            ESP_LOGI(TAG, "[%llu] Temperature: %0.1f\n", ts, temp);
 
             send_temp_sensor_reading_event(temp, ts);
         }

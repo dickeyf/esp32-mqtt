@@ -24,7 +24,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event) {
   switch (event->event_id) {
     case MQTT_EVENT_CONNECTED:
       ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
-      snprintf(topic, sizeof(topic), "iot/sensor/%s/%s/commands/#", settings.datacenter_id, settings.device_id);
+      snprintf(topic, sizeof(topic), "iot/%s/%s/commands/#", settings.datacenter_id, settings.device_id);
       msg_id = esp_mqtt_client_subscribe(client, topic, 0);
       ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
       mqtt_connected();
@@ -48,7 +48,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event) {
       break;
     case MQTT_EVENT_DATA:
       ESP_LOGI(TAG, "MQTT_EVENT_DATA");
-      snprintf(topic, sizeof(topic), "iot/sensor/%s/%s/commands", settings.datacenter_id, settings.device_id);
+      snprintf(topic, sizeof(topic), "iot/%s/%s/commands", settings.datacenter_id, settings.device_id);
       int prefixLen = strlen(topic);
       if (event->topic_len > prefixLen && memcmp(topic, event->topic, prefixLen) == 0) {
           handleCommand(event->data);
@@ -82,7 +82,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event) {
 
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base,
     int32_t event_id, void *event_data) {
-  ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%d", base,
+  ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%ld", base,
       event_id);
   mqtt_event_handler_cb(event_data);
 }
@@ -93,13 +93,16 @@ int mqtt_publish(char* topic, const char* payload) {
 }
 
 void mqtt_start(void) {
-  bool isSSL = (memcmp(settings.mqtt_url, "mqtts", 5)==0) || (memcmp(settings.mqtt_url, "wss", 3)==0);
+  const esp_mqtt_client_config_t mqtt_cfg = {
+      .broker.address.uri = settings.mqtt_url,
+      .credentials = {
+        .username = settings.mqtt_username,
+        .client_id = settings.device_id,
+        .authentication.password = settings.mqtt_password,
+      }
+  };
 
-  const esp_mqtt_client_config_t mqtt_cfg = { .uri =
-      settings.mqtt_url, .username = settings.mqtt_username, .password =
-      settings.mqtt_password, .cert_pem = isSSL?(const char*) mqtt_eclipse_org_pem_start:NULL, };
-
-  ESP_LOGI(TAG, "[APP] Free memory: %d bytes", esp_get_free_heap_size());
+  ESP_LOGI(TAG, "[APP] Free memory: %lu bytes", esp_get_free_heap_size());
   if (mqtt_client!=NULL) {
     esp_mqtt_client_destroy(mqtt_client);
   }

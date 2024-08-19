@@ -39,7 +39,7 @@ static void tilt_sensor_task(void *pvParameters) {
             time_t ts;
             time(&ts);
             int reading = adc1_get_raw(ADC1_CHANNEL_0);
-            ESP_LOGI(TAG, "[%lu] ADC %s: %d / 4096\n", ts, sensor_type, reading);
+            ESP_LOGI(TAG, "[%llu] ADC %s: %d / 4096\n", ts, sensor_type, reading);
 
             send_analog_sensor_reading_event(
                   reading, ts, sensor_type, "adc-4k-levels");
@@ -51,6 +51,6 @@ static void tilt_sensor_task(void *pvParameters) {
 
 void init_analog_sensor(const char *sensor_type) {
     adc1_config_width(ADC_WIDTH_BIT_12);
-    adc1_config_channel_atten(ADC1_CHANNEL_0, ADC_ATTEN_DB_11);
+    adc1_config_channel_atten(ADC1_CHANNEL_0, ADC_ATTEN_DB_12);
     xTaskCreatePinnedToCore(&tilt_sensor_task, "adc_sensor_task", 8192, (void *const) sensor_type, 5, NULL, 0);
 }

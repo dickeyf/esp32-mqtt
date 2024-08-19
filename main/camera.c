@@ -76,7 +76,7 @@ static void camera_stream_task(void *pvParameters) {
   camera_fb_t * fb = NULL;
   uint8_t * _jpg_buf;
   size_t _jpg_buf_len;
-  snprintf(topic, sizeof(topic), "iot/sensor/%s/%s/camera/frames",
+  snprintf(topic, sizeof(topic), "iot/%s/%s/camera/frames",
            settings.datacenter_id, settings.device_id);
 
   char* payload_buf = malloc(1024*100);
@@ -118,7 +118,7 @@ static void camera_stream_task(void *pvParameters) {
   }
 }
 
-void init_camera() {
+void init_camera(int mqtt_stream) {
     //power up the camera if PWDN pin is defined
     if(CAM_PIN_PWDN != -1){
         gpio_reset_pin(CAM_FLASH_PIN);
@@ -136,6 +136,9 @@ void init_camera() {
         ESP_LOGE(TAG, "Camera Init Failed");
     }
 
-  xTaskCreatePinnedToCore(&camera_stream_task, "camera_stream_task", 4096, NULL, 5, NULL, 1);
+  if (mqtt_stream) {
+    ESP_LOGI(TAG, "Starting camera MQTT stream task.");
+    xTaskCreatePinnedToCore(&camera_stream_task, "camera_stream_task", 4096, NULL, 5, NULL, 1);
+  }
 }
 

@@ -46,7 +46,7 @@ static void tilt_sensor_task(void *pvParameters) {
 
                 time_t ts;
                 time(&ts);
-                ESP_LOGI(TAG, "[%lu] %s sensor triggered: %s\n", ts, sensor_type, triggered ? "true" : "false");
+                ESP_LOGI(TAG, "[%llu] %s sensor triggered: %s\n", ts, sensor_type, triggered ? "true" : "false");
                 send_trigger_sensor_reading_event(triggered, ts, sensor_type);
             }
         }
