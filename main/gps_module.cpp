@@ -57,7 +57,7 @@ static void service_uart_queue(uart_port_t uart_num, QueueHandle_t uart_queue) {
                 break;
             case UART_BUFFER_FULL:
                 ESP_LOGI(TAG, "ring buffer full");
-                // If buffer full happened, you should consider encreasing your buffer size
+                // If buffer full happened, you should consider increasing your buffer size
                 // As an example, we directly flush the rx buffer here in order to read more data.
                 uart_flush_input(uart_num);
                 xQueueReset(uart_queue);
@@ -82,6 +82,8 @@ static void service_uart_queue(uart_port_t uart_num, QueueHandle_t uart_queue) {
 static void gps_task(void *pvParameters) {
     QueueHandle_t uart_queue;
 
+    ESP_LOGI(TAG, "Initializing GPS");
+
     const uart_port_t uart_num = UART_NUM_2;
     uart_config_t uart_config = {
             .baud_rate = 9600,
@@ -102,18 +104,28 @@ static void gps_task(void *pvParameters) {
     esp_log_level_set(TAG, ESP_LOG_INFO);
     ESP_ERROR_CHECK(
             uart_set_pin(
-                    uart_num, 17, 16,
+                    uart_num, 4, 2,
                     UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 
     int satelites_valid = 0;
+    uint32_t satelites_tracked = 0;
+    int initialized = 0;
     double last_lat=89.9999;
     double last_lng=0;
+
+    ESP_LOGI(TAG, "GPS UART initialized, starting servicing GPS.");
 
     while (1) {
         service_uart_queue(uart_num, uart_queue);
 
-        if (gps.satellites.isValid() != (satelites_valid!=0)) {
+        if (gps.satellites.isValid() != (satelites_valid!=0) ||
+            gps.satellites.value() != satelites_tracked) {
+            if (initialized==0) {
+                ESP_LOGI(TAG, "GPS Initialized.");
+                initialized = 1;
+            }
             satelites_valid = gps.satellites.isValid();
+            satelites_tracked = gps.satellites.value();
 
             if (satelites_valid) {
                 ESP_LOGI(TAG, "Satellite tracking acquired - # tracked: %lu",

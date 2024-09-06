@@ -22,7 +22,7 @@ void handleCommand(const char* jsonTextData) {
              sensorCommand->commandParam4?"true":"false");
 
     if (strcmp(sensorCommand->commandName, "thrust")==0) {
-        int speed = sensorCommand->commandParam2 * 4000.0;
+        int speed = sensorCommand->commandParam2 * 8000.0;
         int angle = sensorCommand->commandParam3;
         motors_update_thrust(speed, angle);
     } else if (strcmp(sensorCommand->commandName, "servo")==0) {
@@ -32,3 +32,6 @@ void handleCommand(const char* jsonTextData) {
 
     free_SensorCommandSchema(sensorCommand);
 }
+/*
+ *assert failed: sntp_setoperatingmode /IDF/components/lwip/lwip/src/apps/sntp/sntp.c:730 (Operating mode must not be set while SNTP client is running)
+ */
